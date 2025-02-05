@@ -31,6 +31,8 @@ Resources:
   EC2Instance:
     Type: AWS::EC2::Instance
     Properties:
+      Monitoring: true
+      DisableApiTermination: true
       AvailabilityZone:
         Fn::Select:
         - "0"
@@ -350,6 +352,8 @@ Resources:
     Type: AWS::S3::Bucket
     DeletionPolicy: Delete
     Properties:
+      VersioningConfiguration:
+        Status: "Enabled"
       BucketName: !Sub "${AWS::AccountId}-${CompanyName}-${Environment}-flowlogs"
       Tags:
         - Key: Name
@@ -427,6 +431,7 @@ Resources:
     # Key does not have rotation enabled
     Type: AWS::KMS::Key
     Properties:
+      EnableKeyRotation: true
       Description: !Sub "${AWS::AccountId}-${CompanyName}-${Environment}-logs bucket key"
       PendingWindowInDays: 7
       KeyPolicy:
@@ -469,6 +474,8 @@ Resources:
     Type: AWS::RDS::DBInstance
     DeletionPolicy: Delete
     Properties:
+      DeletionProtection: true
+      EnableIAMDatabaseAuthentication: true
       DBName: !Ref DBName
       Engine: MySQL
       OptionGroupName: !Ref DefaultDBOptionGroup
@@ -487,7 +494,7 @@ Resources:
       BackupRetentionPeriod: 0
       StorageEncrypted: False
       MonitoringInterval: 0
-      PubliclyAccessible: True
+      PubliclyAccessible: false
       Tags:
         - Key: Name
           Value: !Sub "${AWS::AccountId}-${CompanyName}-${Environment}-rds"
@@ -690,6 +697,8 @@ Resources:
     # EC2 have plain text secrets in user data
     Type: AWS::EC2::Instance
     Properties:
+      Monitoring: true
+      DisableApiTermination: true
       AvailabilityZone:
         Fn::Select:
         - "0"
@@ -919,6 +928,8 @@ Resources:
     Type: AWS::S3::Bucket
     DeletionPolicy: Delete
     Properties:
+      VersioningConfiguration:
+        Status: "Enabled"
       BucketName: !Sub "${AWS::AccountId}-${CompanyName}-${Environment}-data"
       AccessControl: PublicRead
       Tags:
@@ -947,6 +958,8 @@ Resources:
     Type: AWS::S3::Bucket
     DeletionPolicy: Delete
     Properties:
+      VersioningConfiguration:
+        Status: "Enabled"
       BucketName: !Sub "${AWS::AccountId}-${CompanyName}-${Environment}-financials"
       AccessControl: Private
       Tags:
@@ -1324,4 +1337,3 @@ Outputs:
   DBEndpoint:
     Description: DB Endpoint 
     Value: !Sub ${DefaultDB.Endpoint.Address}:{DefaultDB.Endpoint.Port}
-
